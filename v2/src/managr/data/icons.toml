@@ -1,0 +1,76 @@
+# The glyphs the overlay draws.
+#
+# Nerd Font v3 codepoints. They live in the private use area, so a terminal
+# without a Nerd Font shows a box instead -- set `icons = false` in
+# visuals.toml if that is your problem.
+#
+# Copy this file into the plugin's config dir to change a glyph:
+#   herdr plugin config-dir managr
+#
+# Your file merges over this one, so you can change a single glyph without
+# copying the whole file.
+
+[layer]
+# One glyph per layer, on the entry that enters it.
+nav = ""
+panes = ""
+spaces = ""
+tabs = ""
+session = ""
+reference = ""
+# The custom layer is the odd one out -- its rows are fetched, not declared
+# -- and it still gets a glyph, so every layer row in the root has one.
+custom = ""
+# The navigatr is a mode, not a layer, but the root lists it, so it gets a
+# glyph as well: every row in the root has one.
+navigatr = ""
+# The agents list is a mode too, and it gets the glyph the agent group
+# uses: a layer and a group of the same thing share a glyph in this file
+# (panes/pane, tabs/tab, spaces/workspace).
+agents = ""
+
+[group]
+# One glyph per group in the "all bindings" view.
+pane = ""
+tab = ""
+workspace = ""
+agent = ""
+session = ""
+other = ""
+custom = ""
+
+[kind]
+# The kind of a row in the navigatr, spelled out.
+#
+# It is the fallback for the glyph in the `[group]` section: `icons = false`
+# turns the font's glyphs off, and the kind of a row -- a space, a tab or a
+# pane -- has to stay readable. The tree's own shape does not say it: a tab
+# and a pane are drawn with the same markers.
+#
+# The agent is not a row of its own any more: it is folded into the pane
+# that hosts it, so the tree has three kinds. Its word is left here for
+# the vocabulary's sake.
+workspace = "space"
+tab = "tab"
+pane = "pane"
+agent = "agent"
+
+[marker]
+# The tree markers of the herdr-navigator plugin, so the two read as one
+# family.
+branch = "▾"
+tee = "├─"
+elbow = "└─"
+arrow = "→"
+# The marker of a space whose rows are hidden. The space is folded, so the
+# marker points the other way.
+collapsed = "▸"
+
+[status]
+# The agent status vocabulary, for the same reason.
+idle = "●"
+blocked = "◉"
+# A working agent is halfway: it is doing something, and it is not done.
+working = "◐"
+done = "✓"
+unknown = "○"

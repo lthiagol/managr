@@ -1,0 +1,73 @@
+# Human labels for Herdr actions.
+#
+# Wording deliberately mirrors Herdr's own vocabulary (the `prefix+?` panel and
+# the docs) so the bar reads the same as the rest of the UI. Anything missing
+# here falls back to `action.replace("_", " ")` and raises a warning, which is
+# the signal that Herdr grew an action this build does not know yet.
+
+help = "help"
+settings = "settings"
+detach = "detach"
+reload_config = "reload"
+open_notification_target = "notify"
+
+new_workspace = "new space"
+rename_workspace = "rename space"
+close_workspace = "close space"
+workspace_picker = "workspaces"
+switch_workspace = "space 1-9"
+previous_workspace = "prev space"
+next_workspace = "next space"
+new_worktree = "worktree"
+open_worktree = "open worktree"
+remove_worktree = "rm worktree"
+
+new_tab = "new tab"
+rename_tab = "rename tab"
+close_tab = "close tab"
+previous_tab = "prev tab"
+next_tab = "next tab"
+switch_tab = "tab 1-9"
+move_tab_previous = "move tab back"
+move_tab_next = "move tab fwd"
+
+split_vertical = "split right"
+split_horizontal = "split down"
+close_pane = "close pane"
+rename_pane = "rename pane"
+zoom = "zoom"
+resize_mode = "resize"
+resize_pane_left = "resize left"
+resize_pane_down = "resize down"
+resize_pane_up = "resize up"
+resize_pane_right = "resize right"
+copy_mode = "copy mode"
+edit_scrollback = "scrollback"
+clear_pane = "clear"
+toggle_sidebar = "sidebar"
+last_pane = "last pane"
+cycle_pane_next = "next pane"
+cycle_pane_previous = "prev pane"
+
+focus_pane_left = "focus left"
+focus_pane_down = "focus down"
+focus_pane_up = "focus up"
+focus_pane_right = "focus right"
+swap_pane_left = "swap left"
+swap_pane_down = "swap down"
+swap_pane_up = "swap up"
+swap_pane_right = "swap right"
+
+goto = "goto"
+previous_agent = "prev agent"
+next_agent = "next agent"
+focus_agent = "agent 1-9"
+
+navigate_workspace_up = "space up"
+navigate_workspace_down = "space down"
+navigate_pane_left = "nav left"
+navigate_pane_down = "nav down"
+navigate_pane_up = "nav up"
+navigate_pane_right = "nav right"
+
+remote_image_paste = "paste image"

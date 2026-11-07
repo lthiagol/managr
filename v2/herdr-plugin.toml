@@ -1,0 +1,60 @@
+id = "managr"
+name = "Managr for Herdr"
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+description = "A modal, layered keymap for Herdr. One key opens a tree of layers: navigation, panes, workspaces, tabs."
+platforms = ["linux", "macos"]
+
+# Opening the overlay.
+#
+# The primary trigger is a `type = "plugin_action"` binding in config.toml,
+# which invokes the `open` action below:
+#
+#   [[keys.command]]
+#   key = "prefix+space"
+#   type = "plugin_action"
+#   command = "managr.open"
+#   description = "layered keymap"
+#
+# The binding goes through the plugin on purpose. A `type = "popup"` binding
+# is launched by the server itself, with no `HERDR_PLUGIN_*` environment, so
+# it cannot name a path inside the plugin directory -- it needs a generated
+# launcher, and it has nowhere to put a title: Herdr calls that popup
+# "popup". A plugin action is launched by the plugin runtime, with the
+# plugin root as the working directory and the full environment, and the
+# popup it opens is the plugin's own pane, which has a title: the one
+# below. So the popup is called "Managr" instead of "popup",
+# and the launcher script is not needed at all.
+#
+# The trigger is `prefix+space`, and Herdr's own help panel stays on
+# `prefix+?`: this plugin never touches the native keymap. An earlier
+# version used `prefix+?` and moved the native panel to `prefix+shift+?`,
+# which is ambiguous on a "/?" layout -- the reason is written down in
+# `scripts/configure.py`.
+#
+# The `open` action is also the route for anyone who would rather not use a
+# custom command binding at all: `make open` invokes it.
+[[actions]]
+id = "open"
+title = "Open the layered keymap"
+contexts = ["workspace"]
+command = ["python3", "bin/managr", "open"]
+
+[[actions]]
+id = "tree"
+title = "Print the layer tree"
+contexts = ["workspace"]
+command = ["python3", "bin/managr", "tree"]
+
+# The overlay itself. `placement = "popup"` makes it a session-modal overlay
+# that takes every keystroke, which is what gives it a private keyspace.
+#
+# The title is what Herdr puts on the popup's frame. It is the plugin's
+# name, so the floating window says "Managr" and not "popup".
+[[panes]]
+id = "overlay"
+title = "Managr"
+placement = "popup"
+width = "70%"
+height = "70%"
+command = ["python3", "bin/managr", "overlay"]

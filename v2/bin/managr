@@ -1,0 +1,210 @@
+#!/usr/bin/env python3
+"""managr: a modal, layered keymap for Herdr.
+
+Subcommands:
+
+    open       open the overlay in a popup (this is what the action runs)
+    overlay    run the overlay (this is what the popup runs)
+    tree       print the layer tree as text
+    explain    print the action -> executor mapping and what is not reachable
+"""
+
+import argparse
+import json
+import os
+import sys
+
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src")
+)
+
+from managr import client as client_mod  # noqa: E402
+from managr import tree as tree_mod  # noqa: E402
+
+PLUGIN_ID = os.environ.get("HERDR_PLUGIN_ID", "managr")
+
+
+def _context_ids():
+    """Pull the focused workspace/tab/pane out of the plugin context.
+
+    A popup has no pane id of its own, so the context is where the underlying
+    tiled pane comes from. `pane.current` is the fallback.
+    """
+    raw = os.environ.get("HERDR_PLUGIN_CONTEXT_JSON")
+    if raw:
+        try:
+            context = json.loads(raw)
+        except ValueError:
+            context = {}
+        if isinstance(context, dict):
+            pane = context.get("focused_pane")
+            if isinstance(pane, dict):
+                pane = pane.get("pane_id")
+            return (
+                context.get("workspace_id"),
+                context.get("tab_id"),
+                pane or context.get("focused_pane_id") or context.get("pane_id"),
+            )
+    return None, None, None
+
+
+def _build_tree():
+    labels = tree_mod.load_labels()
+    return tree_mod.build(labels=labels)
+
+
+def cmd_open(args):
+    """Open the overlay popup and get out of the way."""
+    client = client_mod.HerdrClient()
+    try:
+        result = client.call(
+            "plugin.pane.open",
+            {
+                "plugin_id": PLUGIN_ID,
+                "entrypoint": "overlay",
+                "placement": "popup",
+                "focus": True,
+            },
+        )
+    except client_mod.HerdrUnavailable as exc:
+        print("managr: cannot reach herdr (%s)" % exc, file=sys.stderr)
+        return 1
+    except client_mod.HerdrError as exc:
+        if exc.code == "ui_busy":
+            print(
+                "managr: herdr is busy -- settings, copy mode, or another popup "
+                "is open, so the overlay was not opened",
+                file=sys.stderr,
+            )
+        else:
+            print("managr: %s" % exc, file=sys.stderr)
+        return 1
+    finally:
+        client.close()
+
+    if result.get("reason") == "ui_busy":
+        print("managr: herdr is busy, so the overlay was not opened", file=sys.stderr)
+        return 1
+    return 0
+
+
+def cmd_overlay(args):
+    """Run the overlay. This is the popup's own process."""
+    from managr import overlay as overlay_mod
+
+    tree = _build_tree()
+    client = client_mod.HerdrClient()
+
+    workspace_id, tab_id, pane_id = _context_ids()
+    cwd = ""
+    try:
+        current = client.call("pane.current").get("pane") or {}
+        if not pane_id:
+            pane_id = current.get("pane_id")
+            tab_id = current.get("tab_id")
+            workspace_id = current.get("workspace_id")
+        # The focused pane's working directory: Herdr runs a shell command
+        # from there, and so does the overlay.
+        cwd = current.get("cwd") or current.get("foreground_cwd") or ""
+    except (client_mod.HerdrError, client_mod.HerdrUnavailable):
+        pass
+
+    context = _make_context(client, workspace_id, tab_id, pane_id, cwd)
+    surface = overlay_mod.Overlay(tree, context)
+    try:
+        return surface.run()
+    finally:
+        client.close()
+
+
+def _make_context(client, workspace_id, tab_id, pane_id, cwd=None):
+    from managr.actions import Context
+
+    return Context(
+        client,
+        workspace_id=workspace_id,
+        tab_id=tab_id,
+        pane_id=pane_id,
+        cwd=cwd,
+    )
+
+
+def cmd_tree(args):
+    tree = _build_tree()
+    out = sys.stdout
+
+    def show(layer, indent=""):
+        out.write("%s%s\n" % (indent, layer.title))
+        if layer.hint:
+            out.write("%s  %s\n" % (indent, layer.hint))
+        for item in layer.items:
+            if not item.key:
+                out.write("%s      %-22s %s\n" % (indent, item.desc, item.chord or ""))
+                continue
+            mark = " " if item.executable else "~"
+            if item.is_layer or item.is_mode:
+                # The layer and mode keys are the overlay's own, not a
+                # Herdr binding, so there is no chord to show.
+                chord = ""
+            else:
+                chord = item.chord or ("unbound" if item.executable else "")
+            out.write(
+                "%s  %s %-4s %-22s %s\n" % (indent, mark, item.key, item.desc, chord)
+            )
+
+    show(tree.root)
+    for layer_id in tree.layers:
+        out.write("")
+        show(tree.layers[layer_id], "  ")
+    out.write("")
+    show(tree.reference, "  ")
+    return 0
+
+
+def cmd_explain(args):
+    from managr import actions as actions_mod
+
+    out = sys.stdout
+    # The count is of Herdr's own actions: the internal runners below are
+    # local processes and a plugin invocation, not actions the overlay
+    # reaches over the socket.
+    public = actions_mod.public_executors()
+    out.write("executable actions (%d):\n" % len(public))
+    for name in sorted(public):
+        out.write("  %s\n" % name)
+    internal = sorted(
+        name for name in actions_mod.EXECUTORS if name in actions_mod.INTERNAL_ACTIONS
+    )
+    out.write("\ninternal runners (%d), not Herdr actions:\n" % len(internal))
+    for name in internal:
+        out.write("  %s\n" % name)
+    out.write("\nhint rows: Herdr's own UI, no socket method\n")
+    for name, why in sorted(actions_mod.UNREACHABLE.items()):
+        out.write("  %-24s %s\n" % (name, why))
+    return 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(prog="managr")
+    sub = parser.add_subparsers(dest="command")
+
+    sub.add_parser("open", help="open the overlay in a popup")
+    sub.add_parser("overlay", help="run the overlay")
+    sub.add_parser("tree", help="print the layer tree")
+    sub.add_parser("explain", help="print the action mapping")
+
+    args = parser.parse_args(argv)
+    handler = {
+        "open": cmd_open,
+        "overlay": cmd_overlay,
+        "tree": cmd_tree,
+        "explain": cmd_explain,
+    }.get(args.command)
+    if handler is None:
+        parser.print_help()
+        return 2
+    return handler(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

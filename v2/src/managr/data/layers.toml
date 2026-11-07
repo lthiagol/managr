@@ -1,0 +1,489 @@
+# The layer tree.
+#
+# `[[layer]]` declares a layer and the key that enters it from the root.
+# `[[item]]` declares one action inside a layer.
+#
+# The `key` here is the overlay's OWN keyspace. It is not a Herdr binding and
+# cannot collide with one, because the overlay is modal: while it is open it
+# takes every keystroke. The Herdr chord is looked up from your live keymap
+# and shown for reference; it is not what you press.
+#
+# `keep = true` leaves the overlay open after the action runs. That is right
+# for repeatable verbs (moving focus) and wrong for one-shots (split, close),
+# so the default is to close.
+#
+# `value` supplies a fixed argument, e.g. the digit for a 1-9 switch.
+#
+# An action with no executor is rendered as a hint row: the overlay shows the
+# Herdr chord and tells you to press it yourself. That is how Herdr's own UI
+# surfaces (settings, the session navigator, detach) are handled, because they
+# have no socket method.
+
+reference_key = "?"
+
+# The key that opens the navigatr: the session, drawn as a tree.
+#
+# It is a setting and not a constant, so a user who wants it somewhere
+# else moves it here. The root lists it, so the key is discoverable.
+#
+# A layer that binds this key keeps it -- the layer's own binding wins,
+# exactly like the filter's key -- and then the navigatr is not reachable
+# by it, and the root does not list an entry that would promise it is.
+#
+# It is one character: the overlay's keyspace is single characters, so a
+# key of two characters could never be pressed, and the root would not
+# list it either.
+navigatr_key = "j"
+
+# The key that opens the agents list: every agent in the session, the ones
+# that want attention first.
+#
+# It is a setting for the same reason the navigatr's key is one, and it
+# follows the same rules: a key another entry in the root already has is
+# not listed, and neither is a key of more than one character.
+agents_key = "a"
+
+# -- layers -----------------------------------------------------------------
+
+[[layer]]
+id = "nav"
+key = "n"
+title = "navigation"
+hint = "move focus between panes, spaces, tabs and agents"
+
+[[layer]]
+id = "panes"
+key = "p"
+title = "panes"
+hint = "split, close, zoom, resize and rename"
+
+[[layer]]
+id = "spaces"
+key = "w"
+title = "workspaces"
+hint = "create, rename, close and switch"
+
+[[layer]]
+id = "tabs"
+key = "t"
+title = "tabs"
+hint = "create, rename, close, switch and reorder"
+
+[[layer]]
+id = "session"
+key = "s"
+title = "session"
+hint = "config, notifications, and what Herdr keeps for itself"
+
+# The custom layer is the odd one out: its rows are not in this file. They
+# are the user's own `[[keys.command]]` entries and the actions of every
+# installed plugin, and they are fetched when the layer is opened.
+#
+# The key is the overlay's own: "c" is free in the root, which binds n, p,
+# w, t, s, the navigatr's key, the agents list's key and the reference
+# key.
+[[layer]]
+id = "custom"
+key = "c"
+title = "custom"
+hint = "your own commands, and the actions of every plugin"
+
+# -- navigation -------------------------------------------------------------
+
+[[item]]
+layer = "nav"
+key = "h"
+action = "focus_pane_left"
+desc = "focus pane left"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "j"
+action = "focus_pane_down"
+desc = "focus pane down"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "k"
+action = "focus_pane_up"
+desc = "focus pane up"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "l"
+action = "focus_pane_right"
+desc = "focus pane right"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "H"
+action = "swap_pane_left"
+desc = "swap pane left"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "J"
+action = "swap_pane_down"
+desc = "swap pane down"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "K"
+action = "swap_pane_up"
+desc = "swap pane up"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "L"
+action = "swap_pane_right"
+desc = "swap pane right"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "w"
+action = "previous_workspace"
+desc = "previous workspace"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "W"
+action = "next_workspace"
+desc = "next workspace"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "t"
+action = "previous_tab"
+desc = "previous tab"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "T"
+action = "next_tab"
+desc = "next tab"
+keep = true
+
+[[item]]
+layer = "nav"
+key = "g"
+action = "focus_agent"
+desc = "focus agent by number"
+
+# -- panes ------------------------------------------------------------------
+
+[[item]]
+layer = "panes"
+key = "v"
+action = "split_vertical"
+desc = "split right"
+
+[[item]]
+layer = "panes"
+key = "s"
+action = "split_horizontal"
+desc = "split down"
+
+[[item]]
+layer = "panes"
+key = "x"
+action = "close_pane"
+desc = "close pane"
+
+[[item]]
+layer = "panes"
+key = "z"
+action = "zoom"
+desc = "zoom pane"
+
+[[item]]
+layer = "panes"
+key = "n"
+action = "rename_pane"
+desc = "rename pane"
+
+[[item]]
+layer = "panes"
+key = "c"
+action = "clear_pane"
+desc = "clear pane"
+
+[[item]]
+layer = "panes"
+key = "e"
+action = "edit_scrollback"
+desc = "edit scrollback"
+
+[[item]]
+layer = "panes"
+key = "h"
+action = "resize_pane_left"
+desc = "resize left"
+keep = true
+
+[[item]]
+layer = "panes"
+key = "j"
+action = "resize_pane_down"
+desc = "resize down"
+keep = true
+
+[[item]]
+layer = "panes"
+key = "k"
+action = "resize_pane_up"
+desc = "resize up"
+keep = true
+
+[[item]]
+layer = "panes"
+key = "l"
+action = "resize_pane_right"
+desc = "resize right"
+keep = true
+
+# -- workspaces -------------------------------------------------------------
+
+[[item]]
+layer = "spaces"
+key = "n"
+action = "new_workspace"
+desc = "new workspace"
+
+[[item]]
+layer = "spaces"
+key = "r"
+action = "rename_workspace"
+desc = "rename workspace"
+
+[[item]]
+layer = "spaces"
+key = "x"
+action = "close_workspace"
+desc = "close workspace"
+
+[[item]]
+layer = "spaces"
+key = "g"
+action = "new_worktree"
+desc = "new git worktree"
+
+[[item]]
+layer = "spaces"
+key = "1"
+action = "switch_workspace"
+desc = "workspace 1"
+value = "1"
+
+[[item]]
+layer = "spaces"
+key = "2"
+action = "switch_workspace"
+desc = "workspace 2"
+value = "2"
+
+[[item]]
+layer = "spaces"
+key = "3"
+action = "switch_workspace"
+desc = "workspace 3"
+value = "3"
+
+[[item]]
+layer = "spaces"
+key = "4"
+action = "switch_workspace"
+desc = "workspace 4"
+value = "4"
+
+[[item]]
+layer = "spaces"
+key = "5"
+action = "switch_workspace"
+desc = "workspace 5"
+value = "5"
+
+[[item]]
+layer = "spaces"
+key = "6"
+action = "switch_workspace"
+desc = "workspace 6"
+value = "6"
+
+[[item]]
+layer = "spaces"
+key = "7"
+action = "switch_workspace"
+desc = "workspace 7"
+value = "7"
+
+[[item]]
+layer = "spaces"
+key = "8"
+action = "switch_workspace"
+desc = "workspace 8"
+value = "8"
+
+[[item]]
+layer = "spaces"
+key = "9"
+action = "switch_workspace"
+desc = "workspace 9"
+value = "9"
+
+# -- tabs -------------------------------------------------------------------
+
+[[item]]
+layer = "tabs"
+key = "n"
+action = "new_tab"
+desc = "new tab"
+
+[[item]]
+layer = "tabs"
+key = "r"
+action = "rename_tab"
+desc = "rename tab"
+
+[[item]]
+layer = "tabs"
+key = "x"
+action = "close_tab"
+desc = "close tab"
+
+[[item]]
+layer = "tabs"
+key = "<"
+action = "move_tab_previous"
+desc = "move tab back"
+keep = true
+
+[[item]]
+layer = "tabs"
+key = ">"
+action = "move_tab_next"
+desc = "move tab forward"
+keep = true
+
+[[item]]
+layer = "tabs"
+key = "1"
+action = "switch_tab"
+desc = "tab 1"
+value = "1"
+
+[[item]]
+layer = "tabs"
+key = "2"
+action = "switch_tab"
+desc = "tab 2"
+value = "2"
+
+[[item]]
+layer = "tabs"
+key = "3"
+action = "switch_tab"
+desc = "tab 3"
+value = "3"
+
+[[item]]
+layer = "tabs"
+key = "4"
+action = "switch_tab"
+desc = "tab 4"
+value = "4"
+
+[[item]]
+layer = "tabs"
+key = "5"
+action = "switch_tab"
+desc = "tab 5"
+value = "5"
+
+[[item]]
+layer = "tabs"
+key = "6"
+action = "switch_tab"
+desc = "tab 6"
+value = "6"
+
+[[item]]
+layer = "tabs"
+key = "7"
+action = "switch_tab"
+desc = "tab 7"
+value = "7"
+
+[[item]]
+layer = "tabs"
+key = "8"
+action = "switch_tab"
+desc = "tab 8"
+value = "8"
+
+[[item]]
+layer = "tabs"
+key = "9"
+action = "switch_tab"
+desc = "tab 9"
+value = "9"
+
+# -- session ----------------------------------------------------------------
+
+[[item]]
+layer = "session"
+key = "R"
+action = "reload_config"
+desc = "reload config"
+
+[[item]]
+layer = "session"
+key = "N"
+action = "notify"
+desc = "send a notification"
+
+[[item]]
+layer = "session"
+key = "?"
+action = "help"
+desc = "Herdr's own keybind panel"
+
+[[item]]
+layer = "session"
+key = "S"
+action = "settings"
+desc = "Herdr's settings"
+
+[[item]]
+layer = "session"
+key = "G"
+action = "goto"
+desc = "session navigatr"
+
+[[item]]
+layer = "session"
+key = "B"
+action = "toggle_sidebar"
+desc = "toggle sidebar"
+
+[[item]]
+layer = "session"
+key = "D"
+action = "detach"
+desc = "detach the client"
+
+[[item]]
+layer = "session"
+key = "C"
+action = "copy_mode"
+desc = "copy mode"

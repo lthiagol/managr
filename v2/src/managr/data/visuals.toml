@@ -1,0 +1,32 @@
+# How the overlay looks.
+#
+# Copy this file into the plugin's config dir to change it:
+#   herdr plugin config-dir managr
+#
+# Your file merges over this one, so you can change a single setting without
+# copying the whole file.
+
+# The accent colour: the key column, the frame's left edge, the input prompt.
+#
+# Empty means "take it from Herdr's own theme": `theme.custom.accent`, then
+# `ui.accent`, then the name of the theme. A colour that cannot be read on
+# either a dark or a light background is refused, and the built-in accent is
+# used instead (with a warning on stderr).
+#
+# A hex ("#89b4fa"), a name ("cyan") or `rgb(137,180,250)` all work.
+accent = ""
+
+# The Nerd Font glyphs: one per layer, one per group in the "all bindings"
+# view. Turn them off if your font does not have them -- a terminal that
+# cannot draw one shows a box instead.
+icons = true
+
+# The box around the overlay. Turn it off for the plain layout.
+frame = true
+
+# The palette to use, when Herdr's own theme is not one we know: "dracula",
+# "catppuccin", "nord", "tokyo-night", "gruvbox", "one-dark", "solarized",
+# "kanagawa", "rose-pine", "vesper", "terminal".
+#
+# Empty means "use whatever Herdr is using".
+theme = ""
